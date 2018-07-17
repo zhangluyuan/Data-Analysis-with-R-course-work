@@ -1,0 +1,89 @@
+---
+title: "Gapminder Two-Variable exploration"
+---
+#### I will investigate life expectancy and gdp data from gapmider.
+```{r setup, include=FALSE}
+library(ggplot2)
+library(dplyr)
+library(gridExtra)
+```
+
+
+#### load data
+```{r load data}
+le <- read.csv('indicator life_expectancy_at_birth.csv', header = T, row.names = 1, check.names = F)
+gdp<-read.csv('indicator gapminder gdp_per_capita_ppp.csv', header = T, row.names =NULL, check.names = F)
+```
+#### gdp had 262 observations while le has 260
+```{r}
+# inspect value of "GDP_per_capita" found two rows with no country names
+table(gdp$GDP_per_capita)
+#remove these 2 rows by subsetting
+gdp <- subset(gdp, GDP_per_capita!="")
+#rename rows by country names, remove the country column
+rownames(gdp) <- gdp[,1]
+gdp <- gdp[, -1]
+```
+#### gdp contains data from 1800 to 2015;  while lefe_expectancy data contain data from 1800 to 2016.
+#### create a data frame that contain year 2015 data
+```{r}
+data2015<-merge(le["2015"], gdp["2015"], by=0)
+names(data2015) <- c("country", 'life_expectancy', "gdp")
+```
+#### view statistics of gdp
+```{r}
+summary(data2015$gdp)
+```
+#### view statistics of life expectancy
+```{r}
+summary(data2015$life_expectancy)
+```
+
+#### View histogram and boxplot of gdp at 2015
+```{r}
+p1<-qplot(gdp, data=data2015, bins=50)+
+  xlab("GDP per capita")+
+  ggtitle("histogram of GDP at year 2015")
+p2<-ggplot(aes(x=1, y=gdp), data=data2015)+geom_boxplot()
+grid.arrange(p1,p2,ncol=2)
+ggsave(" GDP.png", plot=grid.arrange(p1,p2,ncol=2))
+```
+#### the shape of the histogram of GDP is left skewed. Majority countries have low GDP. The higher the GDP, the fewer number of countries.
+#### By looking at the boxplot, you can see that around 75% of countries GDP is around or less than 25000. There are a few countries whose GDP is much larger than other countries.
+
+#### view histogram and boxplot of life expectancy at year 2015
+```{r}
+p3<-qplot(life_expectancy, data=data2015, bins=30)+
+  xlab("life expectancy (year)")+
+  ggtitle("histogram of life expectancy at year 2015")
+p4<-ggplot(aes(x=1, y=life_expectancy), data=data2015)+geom_boxplot()
+grid.arrange(p3,p4,ncol=2)
+ggsave("life expentancy.png", plot=grid.arrange(p3,p4,ncol=2))
+```
+#### By look at the histogram you can see that life expectancy is right skewed. By looking at the boxplot you can see that at year 2015, 75% of the countries life expectancy is above 68. 
+
+#### create a scatter plot to view relationship between life_expectancy and gdp
+```{r}
+p5<-ggplot(aes(x=gdp, y=life_expectancy), data=data2015) +
+  geom_point(color="red", alpha=0.5)+
+  xlab("gdp (per capita)")+
+  ylab("life expectancy (years)")+
+  ggtitle("life expectancy vs. gdp at 2015")
+p5
+ggsave("life expectancy vs gdp.png")
+```
+#### There seem to be an exponential relationship between gdp and life expectancy
+#### tranform gdp using log10
+```{r}
+p6<-p5+coord_trans(x='log10')
+p6
+ggsave("life expectancy vs log10(gdp).png")
+```
+#### After tranformation, life expectancy seem to be lieanrly correlated with log10 of gdp
+
+#### correlation with life expectancy and log10 of gdp
+```{r}
+with(data2015, cor.test(life_expectancy, log10(gdp)))
+```
+#### correlation coefficient = 0.8. P value is 2.2e-16. 
+### conclusion: life expectancy is strongly correlated with GDP
