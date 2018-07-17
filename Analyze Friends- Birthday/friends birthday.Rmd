@@ -1,0 +1,79 @@
+---
+title: "Explore Friends Birthday"
+---
+
+```{r setup, include=FALSE}
+library(ggplot2)
+install.packages("lubridate")
+library(lubridate)
+library(dplyr)
+```
+## Explore a sample birthday data set and answer following questions:
+(1) How many people have the same birthday as me?
+(2) Which month contains the most number of birthdays?
+(3) How many birthdays are in each month?
+(4) Which day of the year has the most number of birthdays?
+(5) Do you have at least 365 friends that have birthdays on everyday of the year?
+
+```{r load data}
+birthdays <- read.csv('birthdaysExample.csv', header = T, row.names = NULL, as.is=TRUE ,check.names = F)
+```
+#### convert string to datetime
+```{r}
+birthdays$bday<-strptime(birthdays$dates, '%m/%d/%y')
+```
+#### how many people have the same birthday as me? Assume my birthday is December 12th.
+```{r}
+nrow(subset(birthdays, month(bday)=='12' & day(bday)=='12'))
+```
+#### I have one friend who has the same birthday as me!
+
+#### Which month contains the most number of birthdays?
+```{r}
+birthdays$month <-month(birthdays$bday)
+birthdays$bday <- as.Date(birthdays$bday)
+month_counts <-count(birthdays, month)
+month_counts <- arrange(month_counts, desc(n))
+```
+#### March has most number of birthdays, 98
+
+#### Question (3) How many birthdays are in each month? 
+```{r}
+ggplot(aes(x=month, y=n), data=month_counts)+
+  ggtitle("birthday counts by month")+
+  geom_bar(stat="identity", color="gray", fill="blue")+
+  scale_x_continuous(breaks=seq(0,12,1))
+  xlab('month')+
+  ylab("number of birthdays")
+```
+#### Question (4) Which day of the year has the most number of birthdays?
+```{r}
+birthdays$day <- day(birthdays$bday)
+birthdays$day <- factor(birthdays$day)
+day_counts <- count(birthdays, day)
+day_counts<-arrange(day_counts, desc(n))
+```
+#### The 14th day has the most number of birthdays.
+
+#### Question (5) Do you have at least 365 friends that have birthdays on everyday of the year?
+```{r}
+# count the number of unique values of month-day combination
+birthdays$month_day<-format(as.Date(birthdays$bday), "%m-%d" )
+monthday_counts <-count(birthdays, month_day)
+monthday_counts<-arrange(monthday_counts, desc(n))
+length(unique(birthdays$month_day))
+```
+#### There are 1033 birthdays, larger than 365. But there are only 348 unique month-days, and on somedays I dont have a friend whose birthday is that day.
+
+## Summary:
+(1) How many people have the same birthday as me?
+1
+(2) Which month contains the most number of birthdays?
+March
+(3) How many birthdays are in each month?
+Please see the bar chart above
+(4) Which day of the year has the most number of birthdays?
+14th, when not considering which month.
+when considering month, these days have the most number of birthdays: Feb.06th, May22nd, and July 16th.
+(5) Do you have at least 365 friends that have birthdays on everyday of the year?
+No I don't
