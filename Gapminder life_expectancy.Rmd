@@ -1,0 +1,68 @@
+---
+title: "Gapminder life_expectancy"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(ggplot2)
+```
+
+### Task: download a data set of your choice from Gapminder and create 2-5 plots that make use of the techniques from Lesson 3.
+#### The plot can be a simple histogram, a boxplot split over a categorical variable, or a frequency polygon. The choice is yours!
+#### After I have completed the investigation, I will create a post in the discussions that includes:
+####       1. any questions you answered, your observations, and summary statistics
+####       2. snippets of code that created the plots
+####       3. links to the images of your plots
+
+#### Images are saved by using the ggsave() command.
+
+#### load data
+```{r load data}
+life_expectancy <- read.csv('indicator life_expectancy_at_birth.csv', header = T, row.names = 1, check.names = F)
+```
+#### view histogram of life expectancy at year 2016
+```{r}
+qplot(life_expectancy$'2016', data=life_expectancy, binwidth=2, main="life expectancy at 2016")+
+  xlab("life expectancy at year 2016")
+```
+```{r}
+ggsave("histogram of life expectancy at year 2016.png")
+```
+
+
+**From the histogram, there seems to be 3 divisions of countries whose life** **expectancies fall into 3 distinct bucket: (40, 58], (58, 70], (70, 85]**
+
+#### View box_plot of life expectancy at year 2016
+```{r}
+boxplot(life_expectancy$'2016',data=life_expectancy, main="Life expectancy at year 2016", ylab="life expectancy (years)")
+```
+```{r}
+ggsave("boxplot of life expectancy at year 2016.png")
+```
+
+
+#### aggregate yearly data to mean, median, range, IQR, and standard deviation across countries
+```{r}
+aggregated<-data.frame(data.frame("year"=strtoi(names(life_expectancy)), "count"=0, "mean"=0))
+aggregated$count<-apply(life_expectancy, 2, function(x) length(which(!is.na(x))))
+aggregated$mean <-apply(life_expectancy, 2, function(x) mean(x, na.rm=TRUE))
+aggregated$median <-apply(life_expectancy, 2, function(x) median(x, na.rm=TRUE))
+aggregated$range <-apply(life_expectancy, 2, function(x) max(x, na.rm=TRUE)-min(x, na.rm=TRUE))
+aggregated$sd <-apply(life_expectancy, 2, function(x) sd(x, na.rm=TRUE))
+aggregated$IQR <-apply(life_expectancy, 2, function(x) IQR(x, na.rm=TRUE))
+```
+#### view trend od global mean of life_expectance
+```{r}
+ggplot(aes(x=year, y=mean), data=aggregated)+
+  geom_point(aes(size=sd), alpha=0.2, color="green")+
+  xlab("year")+
+  ylab("global average life expectancy")+
+  scale_x_continuous(breaks=seq(1800, 2016, by=20))+
+  ggtitle("mean global life expectancy")
+```
+
+```{r}
+ggsave("trend of mean global life expectancy.png")
+```
+
+**From the above scatter plot we can see than before year 1880, global life expectancy** **is around 32, with very little variation between counties. It start to** **increase fast after year 1900, and increasing very fast after year 1950.** **Meanwhile the variation between countries also increased.**
