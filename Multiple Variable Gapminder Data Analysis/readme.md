@@ -4,12 +4,10 @@ This is the final quiz of lesson 8.
 Multiple indicators were downloaded from Gapminder: cancer, gdp, employment rate, bmi, life expectancy, population density, CO2 emission.
 <br>
 <br>
-
 Data were cleaned, aggregated and merged before analysis
 <br>
 <br>
-
-        Key observation:
+Key observation:
          <br>
         (a) BMI has strong positive correlation with employment rate
                           <br>
@@ -25,4 +23,3 @@ Data were cleaned, aggregated and merged before analysis
                           <br>
                          (f) life expectancy, CO2 emission, population density and GDP have bimodal distribution
                           <br>
-
