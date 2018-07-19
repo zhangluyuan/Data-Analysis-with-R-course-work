@@ -7,7 +7,7 @@ Multiple indicators were downloaded from Gapminder: cancer, gdp, employment rate
 Data were cleaned, aggregated and merged before analysis
 <br>
 <br>
-Key observation:
+Key observations:
          <br>
         (a) BMI has strong positive correlation with employment rate
                           <br>
