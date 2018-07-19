@@ -1,16 +1,22 @@
 # Data-Analysis-with-R-course-work
 This repository contains my answers to some of the quiz of this course
 <br>
+ <br>
 (1) Explore one variable:   Gapminder data: Life expectancy. 
 <br>
+ <br>
 (2) Analyze friends' birthday data
+ <br>
 (3) Explore two variables of Gapminder data: life expectancy vs GDP
 <br>
         Key observation: life expectancy of different countries are strongly correlated with log of GDP
 <br>
+ <br>
  (4) Explore multiple variables of Gapminder data: cancer mortality, GDP, life expectancy, CO2 emission, BMI, employment rate, population density
 <br>
-        Key observation: (a) BMI has strong positive correlation with employment rate
+        Key observation:
+         <br>
+        (a) BMI has strong positive correlation with employment rate
                           <br>
                          (b) life expectancy of different countries are strongly correlated with log of GDP
                           <br>
