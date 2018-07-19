@@ -7,6 +7,7 @@ This repository contains my answers to some of the quiz of this course
  <br>
 (2) Analyze friends' birthday data
  <br>
+  <br>
 (3) Explore two variables of Gapminder data: life expectancy vs GDP
 <br>
         Key observation: life expectancy of different countries are strongly correlated with log of GDP
