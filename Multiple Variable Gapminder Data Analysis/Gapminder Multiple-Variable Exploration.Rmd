@@ -1,0 +1,190 @@
+---
+title: "Gapminder Many-Variable exploration"
+---
+### Task: Examine 3 or more variables and create 2-5 plots that make use of the techniques from Lesson 5.
+
+### Indicators investigated, and the original files from Gapminder:
+#### GDP: indicator gapminder gdp_per_capita_ppp.xlsx
+#### life expectancy: indicator life_expectancy_at_birth.xlsx
+#### BMI: Indicator_BMI female ASM.xlsx, Indicator_BMI male ASM.xlsx
+#### employment rate:indicator_t above 15 employ.xlsx
+#### cancer death per 100,000: Motality of female and male with following cancer: stomach, colon, liver, lung,
+
+#### Import libraries
+```{r setup, include=FALSE}
+library(ggplot2)
+library(GGally)
+library(tidyr)
+library(dplyr)
+library(gridExtra)
+``` 
+
+
+#### load cancer data and generate a mean cancer death rate across 7 cancers
+```{r load data}
+stomach_female<-read.csv('stomach cancer female.csv', header = T, row.names = 1, check.names = F)
+colnames(stomach_female)[which(colnames(stomach_female) == '2002')] <- 'stomach_female'
+stomach_male<-read.csv('stomach cancer male.csv', header = T, row.names = 1, check.names = F)
+colnames(stomach_male)[which(colnames(stomach_male) == '2002')] <- 'stomach_male'
+lung_female<-read.csv('lung cancer female.csv', header = T, row.names = 1, check.names = F)
+colnames(lung_female)[which(colnames(lung_female) == '2002')] <- 'lung_female'
+lung_male<-read.csv('lung cancer male.csv', header = T, row.names = 1, check.names = F)
+colnames(lung_male)[which(colnames(lung_male) == '2002')] <- 'lung_male'
+liver_female<-read.csv('liver cancer female.csv', header = T, row.names = 1, check.names = F)
+colnames(liver_female)[which(colnames(liver_female) == '2002')] <- 'liver_female'
+liver_male<-read.csv('liver cancer male.csv', header = T, row.names = 1, check.names = F)
+colnames(liver_male)[which(colnames(liver_male) == '2002')] <- 'liver_male'
+colon_female<-read.csv('colon cancer female.csv', header = T, row.names = 1, check.names = F)
+colnames(colon_female)[which(colnames(colon_female) == '2002')] <- 'colon_female'
+colon_male<-read.csv('colon cancer male.csv', header = T, row.names = 1, check.names = F)
+colnames(colon_male)[which(colnames(colon_male) == '2002')] <- 'colon_male'
+```
+#### View what years data are in cancer tables
+```{r}
+names(colon_female)
+names(colon_male)
+names(liver_female)
+names(liver_male)
+names(lung_female)
+names(lung_male)
+names(stomach_female)
+names(stomach_male)
+```
+***All the indicators have data up to year 2002. For years before 2002, majority data are NA. So here I will focus on 2002 data.***
+
+#### extract data of year 2002 and join them into a single table "cancer", by country name
+```{r}
+lung_cancer<-merge(lung_female['lung_female'], lung_male['lung_male'],by=0)
+liver_cancer <- merge(liver_female['liver_female'], liver_male['liver_male'],by=0)
+stomach_cancer<-merge(stomach_female['stomach_female'], stomach_male['stomach_male'],by=0)
+colon_cancer <-merge(colon_female['colon_female'], colon_male['colon_male'],by=0)
+cancer <-merge(lung_cancer, liver_cancer, by='Row.names')
+cancer <- merge(cancer, colon_cancer, by="Row.names")
+cancer <- merge(cancer, stomach_cancer, by="Row.names")
+#remove unnecessary tables from memory
+rm(lung_cancer, lung_female, lung_male, liver_cancer, liver_female, liver_male)
+rm(colon_cancer, colon_female, colon_male, stomach_cancer, stomach_female, stomach_male)
+# rename row names to country
+rownames(cancer)<-cancer$Row.names
+# drop unnecessary column and row
+cancer <-cancer[-1]
+cancer<-cancer[-1, ]
+```
+#### Just out of curiosity, I want to know if motality of different cancers of same countries are correlated. So I plot correlation of all the cancer columns with ggpairs 
+```{r}
+ggpairs(data=cancer, axisLabels="internal")
+ggsave("cancer correlations.png")
+```
+***For the same cancer, the motality of male and female patients are strongly correlated. This is evident from the scatter plots and calculated coefficients. Coefficients of male and female patients of the same cancer are:
+Lung cancer: 0.667;  liver cancer: 0.928;  colon cancer: 0.932, stomach cancer: 0.832.
+correlation of motality between different cancers are weakly correlated. One exception is correlation between lung cancer and colon cancer. For example, the correlation between the lung cancer and colon cancer male motality is 0.823. This could indicate that these two diseased are related. Causes that lead to lung cancer probably also lead to colon cancer.*** 
+
+#### compute sum of cancer motality rate of the 4 different cancers.
+```{r}
+cancer$total_motality<-rowSums(cancer)
+```
+#### At this stage I completed cleaning of cancer data.
+
+#### cleaning and merging of BMI data
+```{r}
+#load data
+BMI_female <- read.csv('female BMI.csv', header = T, row.names = 1, check.names = F)
+BMI_male <- read.csv('male BMI.csv', header = T, row.names = 1, check.names = F)
+#change colomn "2002" to "BMI_male" or "BMI_female"
+colnames(BMI_female)[which(colnames(BMI_female) == '2002')] <- 'BMI_female'
+colnames(BMI_male)[which(colnames(BMI_male) == '2002')] <- 'BMI_male'
+#merge to BMI columns and form a data frame "bmi"
+bmi<-merge(BMI_female['BMI_female'], BMI_male['BMI_male'], by=0)
+#change row names
+rownames(bmi)<-bmi$Row.names
+bmi<-bmi[-1]
+#compute mean bmi of male and female
+bmi$bmi<-rowMeans(bmi)
+rm(BMI_female,BMI_male)
+```
+#### BMI data wrangling is complete
+
+#### Load other data sets
+```{r}
+le <- read.csv('life_expectancy.csv', header = T, row.names = 1, check.names = F)
+gdp<-read.csv('gdp.csv', header = T, row.names =NULL, check.names = F)
+CO2<-read.csv('CO2_tons_per_person.csv', header = T, row.names =1, check.names = F)
+population_density<-read.csv('population_density_per_sqaure_km.csv', header = T, row.names =1, check.names = F)
+employment_rate<-read.csv('employment_rate_over_age_15.csv', header = T, row.names =1, check.names = F)
+```
+#### rename the variable "2002" into indicator name
+```{r}
+colnames(le)[which(colnames(le) == '2002')] <- 'life_expectancy'
+colnames(gdp)[which(colnames(gdp) == '2002')] <- 'gdp'
+colnames(CO2)[which(colnames(CO2) == '2002')] <- 'CO2'
+colnames(population_density)[which(colnames(population_density) == '2002')] <- 'population_density'
+colnames(employment_rate)[which(colnames(employment_rate) == '2002')] <- 'employment_rate'
+colnames(gdp)[which(colnames(gdp) == '2002')] <- 'gdp'
+```
+
+#### gdp data cleaning: gdp had 262 observations, 2 of which are missing country names
+```{r}
+# inspect value of "GDP_per_capita" found two rows with no country names
+table(gdp$GDP_per_capita)
+#remove these 2 rows by subsetting
+gdp <- subset(gdp, GDP_per_capita!="")
+#rename rows by country names, remove the country column
+rownames(gdp) <- gdp[,1]
+gdp <- gdp[-1]
+```
+#### gdp data cleaning is complete
+
+#### Merge all 2002 data into one single data frame
+```{r}
+data_2002<-merge(bmi["bmi"], cancer["total_motality"], by=0)
+data_2002<-merge(data_2002, CO2["CO2"], by.x="Row.names", by.y=0)
+data_2002<-merge(data_2002, employment_rate['employment_rate'], by.x="Row.names", by.y=0)
+data_2002<-merge(data_2002, gdp['gdp'], by.x="Row.names", by.y=0)
+data_2002<-merge(data_2002, le['life_expectancy'], by.x="Row.names", by.y=0)
+data_2002<-merge(data_2002, population_density['population_density'], by.x="Row.names", by.y=0)
+```
+#### Now I have all the 2002 data in data_2002, I can remove other data frames from memory
+```{r}
+# remove unnecessary data frames
+rm(bmi)
+rm(cancer)
+rm(employment_rate)
+rm(gdp)
+rm(le)
+rm(population_density)
+rm(CO2)
+#rename row names with country names
+rownames(data_2002)<-data_2002$Row.names
+data_2002<-data_2002[-1]
+```
+#### view paried correlations of all the indicators
+#### subset the data with population_density < 500.
+```{r}
+qplot(population_density, data=data_2002, bins=20)+
+  xlab("population per square km")
+ggsave("population density.png")
+ggpairs(subset(data_2002, population_density < 500));
+ggsave("multiple variable correlation.png")
+```
+***Based on the pairs of correlations, I can make following observations:
+1. BMI and employment rate are both close to normaly distributed.
+2. cancer mortality is close to normal distribution, and it is left skewed.
+3. CO2 emission, gdp, life expectancy and population density are all bimodal distributio.
+4. Following pairs show strong correlations:
+    BMI and employment rate: linear correlation with coeffient=0.98;  
+    CO2 and GDP: linear correlation with coefficient = 0.887
+    CO2 and life expectancy: exponential correlation, coefficient=0.49
+    GDP with life expectancy: exponential correlation, coefficient=0.55***
+    
+#### Re-compute the correlation between CO2 and life expectancyafter log10 transformation
+```{r}
+with(data_2002, cor.test(log10(CO2), life_expectancy))
+```
+***After log10 transformation of CO2, the coefficient between life expectancy and log10(CO2) is 0.76, indicating a strong correlation***
+
+#### Re-compute the correlation between CO2 and life expectancyafter log10 transformation
+```{r}
+with(data_2002, cor.test(log10(gdp), life_expectancy))
+```
+***After log10 transformation of gdp, the coefficient between life expectancy and log10(gdp) is 0.78, indicating a strong correlation***
+
