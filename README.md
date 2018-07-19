@@ -15,7 +15,7 @@ This repository contains my answers to some of the quiz of this course
  <br>
  (4) Explore multiple variables of Gapminder data: cancer mortality, GDP, life expectancy, CO2 emission, BMI, employment rate, population density
 <br>
-        Key observation:
+        Key observations:
          <br>
         (a) BMI has strong positive correlation with employment rate
                           <br>
