@@ -1,5 +1,5 @@
 # Data-Analysis-with-R-course-work
-This repository contains my answers to some of the quiz of this course
+This repository contains my answers to some of the quiz of this course that I took on Udacity.com
 <br>
  <br>
 (1) Explore one variable:   Gapminder data: Life expectancy. 
